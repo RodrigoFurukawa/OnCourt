@@ -1,0 +1,14 @@
+{% extends "booking/base.html" %}
+
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Criar conta</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">Cadastrar</button>
+    </form>
+</div>
+{% endblock %}

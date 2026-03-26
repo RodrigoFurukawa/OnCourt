@@ -1,0 +1,26 @@
+{% extends "booking/base.html" %}
+
+{% block title %}Minhas Reservas{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="section-title">Minhas Reservas</h2>
+    <p class="section-subtitle">Acompanhe seus horários e locais reservados.</p>
+
+    {% for reservation in reservations %}
+        <div class="reservation-item">
+            <h3>{{ reservation.court_name }}</h3>
+            <div class="meta-list">
+                <span class="meta-item">📍 {{ reservation.location }}</span>
+                <span class="meta-item">🕒 {{ reservation.slot }}</span>
+                <span class="meta-item">💸 R$ {{ reservation.price_per_hour }}</span>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-state">
+            <h3>Você ainda não possui reservas</h3>
+            <p>Explore a lista de quadras e faça sua primeira reserva.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

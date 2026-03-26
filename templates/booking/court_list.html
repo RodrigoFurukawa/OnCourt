@@ -1,0 +1,134 @@
+{% extends "booking/base.html" %}
+{% load static %}
+
+{% block title %}Quadras{% endblock %}
+
+{% block content %}
+<div class="card filter-card glass-card">
+    <h2 class="section-title">Encontre sua próxima quadra</h2>
+    <p class="section-subtitle">
+        Filtre por modalidade, nome, disponibilidade, faixa de avaliação e ordenação.
+    </p>
+
+    <form method="get" class="custom-filter-form">
+        <div>
+            <label for="{{ form.sport.id_for_label }}">{{ form.sport.label }}</label>
+            {{ form.sport }}
+        </div>
+
+        <div>
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+        </div>
+
+        <div>
+            <label for="{{ form.availability.id_for_label }}">{{ form.availability.label }}</label>
+            {{ form.availability }}
+        </div>
+
+        <div>
+            <label for="{{ form.sort_by.id_for_label }}">{{ form.sort_by.label }}</label>
+            {{ form.sort_by }}
+        </div>
+
+        <div>
+            <label for="{{ form.min_rating.id_for_label }}">
+                {{ form.min_rating.label }}:
+                <span id="min-rating-value">
+                    {% if form.min_rating.value %}{{ form.min_rating.value }}{% else %}0{% endif %}
+                </span>
+            </label>
+            {{ form.min_rating }}
+        </div>
+
+        <div>
+            <label for="{{ form.max_rating.id_for_label }}">
+                {{ form.max_rating.label }}:
+                <span id="max-rating-value">
+                    {% if form.max_rating.value %}{{ form.max_rating.value }}{% else %}5{% endif %}
+                </span>
+            </label>
+            {{ form.max_rating }}
+        </div>
+
+        <div>
+            <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+        </div>
+    </form>
+</div>
+
+{% if courts %}
+    <div class="court-grid">
+        {% for court in courts %}
+            <article class="card court-card">
+                <div class="court-image">
+                    <img src="{% static court.image %}" alt="{{ court.name }}">
+                    {% if court.featured %}
+                        <span class="image-pill">Top choice</span>
+                    {% endif %}
+                </div>
+
+                <div class="court-content">
+                    <div class="court-top">
+                        <div>
+                            <h3>{{ court.name }}</h3>
+                            <span class="badge badge-neutral">{{ court.sport|title }}</span>
+                        </div>
+
+                        {% if court.available_for_rent %}
+                            <span class="badge badge-success">Disponível</span>
+                        {% else %}
+                            <span class="badge badge-danger">Indisponível</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="meta-list">
+                        <span class="meta-item">📍 {{ court.location }}</span>
+                        <span class="meta-item">⭐ {{ court.rating }}</span>
+                        <span class="meta-item">📏 {{ court.distance_km }} km</span>
+                        <span class="meta-item">💸 R$ {{ court.price_per_hour }}/h</span>
+                    </div>
+
+                    <div class="tag-list">
+                        {% for tag in court.tags %}
+                            <span class="tag-chip">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <p class="court-description">{{ court.description }}</p>
+
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="{% url 'court_detail' court.id %}">Ver detalhes</a>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card empty-state">
+        <h3>Nenhuma quadra encontrada</h3>
+        <p>Tente alterar os filtros para visualizar outras opções.</p>
+    </div>
+{% endif %}
+
+<script>
+    const minSlider = document.getElementById("id_min_rating");
+    const maxSlider = document.getElementById("id_max_rating");
+    const minValue = document.getElementById("min-rating-value");
+    const maxValue = document.getElementById("max-rating-value");
+
+    if (minSlider && minValue) {
+        minValue.textContent = minSlider.value;
+        minSlider.addEventListener("input", function() {
+            minValue.textContent = this.value;
+        });
+    }
+
+    if (maxSlider && maxValue) {
+        maxValue.textContent = maxSlider.value;
+        maxSlider.addEventListener("input", function() {
+            maxValue.textContent = this.value;
+        });
+    }
+</script>
+{% endblock %}

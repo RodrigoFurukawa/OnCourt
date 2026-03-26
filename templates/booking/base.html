@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QuadraMVP{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav-inner">
+            <a href="{% url 'home' %}" class="brand">
+                <div class="brand-badge">Q</div>
+                <span>QuadraMVP</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="{% url 'home' %}">Início</a>
+                <a href="{% url 'court_list' %}">Quadras</a>
+                <a href="{% url 'about' %}">Sobre</a>
+                <a href="{% url 'faq' %}">FAQ</a>
+                <a href="{% url 'contact' %}">Contato</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'my_reservations' %}">Minhas Reservas</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin_dashboard' %}">Painel Admin</a>
+                    {% endif %}
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit">Sair</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Entrar</a>
+                    <a href="{% url 'signup' %}">Cadastrar</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div>
+                <strong>QuadraMVP</strong>
+                <p>Protótipo de plataforma para aluguel de quadras esportivas.</p>
+            </div>
+            <div>
+                <p>Contato: contato@quadramvp.com</p>
+                <p>São Paulo • Brasil</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

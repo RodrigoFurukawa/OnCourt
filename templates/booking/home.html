@@ -1,0 +1,157 @@
+{% extends "booking/base.html" %}
+{% load static %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <h1>Reserve quadras esportivas com experiência de plataforma real</h1>
+        <p>
+            Busque por modalidade, compare quadras, veja disponibilidade e concentre a jornada
+            de reserva em um ambiente moderno, simples e escalável para a próxima fase do produto.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{% url 'court_list' %}">Explorar quadras</a>
+            <a class="btn btn-secondary" href="{% url 'about' %}">Ver proposta da plataforma</a>
+        </div>
+    </div>
+
+    <div class="hero-media">
+        <img src="{% static 'images/hero-sports.svg' %}" alt="Reserva de quadras esportivas">
+    </div>
+</section>
+
+<section class="stats-strip">
+    <div class="stat-card">
+        <strong>{{ stats.courts }}</strong>
+        <span>quadras cadastradas no protótipo</span>
+    </div>
+    <div class="stat-card">
+        <strong>{{ stats.available }}</strong>
+        <span>quadras disponíveis agora</span>
+    </div>
+    <div class="stat-card">
+        <strong>{{ stats.sports }}</strong>
+        <span>modalidades esportivas</span>
+    </div>
+    <div class="stat-card">
+        <strong>{{ stats.avg_rating }}</strong>
+        <span>avaliação média das quadras</span>
+    </div>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">Quadras em destaque</h2>
+    <p class="section-subtitle">
+        Espaços com melhor posicionamento no MVP para simular uma vitrine principal da plataforma.
+    </p>
+
+    <div class="court-grid">
+        {% for court in featured_courts %}
+            <article class="card court-card glass-card">
+                <div class="court-image">
+                    <img src="{% static court.image %}" alt="{{ court.name }}">
+                    <span class="image-pill">Destaque</span>
+                </div>
+
+                <div class="court-content">
+                    <div class="court-top">
+                        <div>
+                            <h3>{{ court.name }}</h3>
+                            <span class="badge badge-neutral">{{ court.sport|title }}</span>
+                        </div>
+
+                        {% if court.available_for_rent %}
+                            <span class="badge badge-success">Disponível</span>
+                        {% else %}
+                            <span class="badge badge-danger">Indisponível</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="meta-list">
+                        <span class="meta-item">📍 {{ court.location }}</span>
+                        <span class="meta-item">⭐ {{ court.rating }}</span>
+                        <span class="meta-item">💸 R$ {{ court.price_per_hour }}/h</span>
+                    </div>
+
+                    <div class="tag-list">
+                        {% for tag in court.tags %}
+                            <span class="tag-chip">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <p class="court-description">{{ court.description }}</p>
+
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="{% url 'court_detail' court.id %}">Ver quadra</a>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">Uma experiência pensada para crescer</h2>
+    <p class="section-subtitle">
+        O MVP já valida a jornada principal do produto e prepara a base para banco real, pagamentos e agenda persistente.
+    </p>
+
+    <div class="grid-3">
+        <div class="card feature-card">
+            <div class="feature-icon">01</div>
+            <h3>Descoberta rápida</h3>
+            <p>O cliente encontra quadras por esporte, nome, distância e avaliação em uma interface centralizada.</p>
+        </div>
+
+        <div class="card feature-card">
+            <div class="feature-icon">02</div>
+            <h3>Reserva concentrada</h3>
+            <p>Login, seleção de horário e visualização das reservas já ficam modelados no fluxo principal da plataforma.</p>
+        </div>
+
+        <div class="card feature-card">
+            <div class="feature-icon">03</div>
+            <h3>Gestão operacional</h3>
+            <p>O administrador acompanha disponibilidade, bloqueios temporários e leitura de oferta em um painel próprio.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">Depoimentos simulados</h2>
+    <p class="section-subtitle">
+        Elemento visual útil para dar mais realismo ao protótipo e comunicar proposta de valor.
+    </p>
+
+    <div class="review-grid">
+        <div class="card review-card">
+            <p>“A experiência ficou intuitiva. Em poucos cliques já consigo localizar a quadra e seguir para a reserva.”</p>
+            <div class="review-author">Marina • jogadora amadora</div>
+        </div>
+
+        <div class="card review-card">
+            <p>“O painel administrativo já mostra uma visão clara de disponibilidade. Isso ajuda bastante a imaginar a operação real.”</p>
+            <div class="review-author">Rafael • gestor de arena</div>
+        </div>
+
+        <div class="card review-card">
+            <p>“O produto já transmite valor visualmente, mesmo ainda usando dados mockados. Parece muito mais próximo de mercado.”</p>
+            <div class="review-author">Lucas • avaliador do projeto</div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-band">
+    <h2>Pronto para transformar esse protótipo em produto real</h2>
+    <p>
+        A próxima evolução natural é persistir quadras, reservas e bloqueios em banco, adicionar checkout
+        e impedir conflitos de horário em produção.
+    </p>
+    <div class="hero-actions">
+        <a class="btn btn-primary" href="{% url 'court_list' %}">Começar pela busca</a>
+        <a class="btn btn-secondary" href="{% url 'signup' %}">Criar conta</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "booking/base.html" %}
+
+{% block title %}Painel Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="section-title">Painel administrativo</h2>
+    <p class="section-subtitle">Acompanhe disponibilidade e bloqueios temporários das quadras.</p>
+
+    <div class="meta-list">
+        <span class="meta-item">Total de quadras: {{ courts|length }}</span>
+        <span class="meta-item">Disponíveis: {{ available_courts|length }}</span>
+    </div>
+</div>
+
+<div class="card">
+    {% for court in courts %}
+        <div class="admin-item">
+            <h3>{{ court.name }}</h3>
+            <div class="meta-list">
+                <span class="meta-item">Esporte: {{ court.sport|title }}</span>
+                <span class="meta-item">Local: {{ court.location }}</span>
+                <span class="meta-item">Horários: {{ court.slots|join:", " }}</span>
+            </div>
+
+            {% if court.available_for_rent %}
+                <span class="badge badge-success">Disponível</span>
+                <form method="post" class="admin-actions">
+                    {% csrf_token %}
+                    <input type="hidden" name="court_id" value="{{ court.id }}">
+                    <input type="hidden" name="action" value="disable">
+                    <div>
+                        <label>Motivo do bloqueio</label>
+                        <input type="text" name="reason" placeholder="Ex.: manutenção">
+                    </div>
+                    <div>
+                        <label>Bloqueado até</label>
+                        <input type="text" name="until" placeholder="Ex.: 2026-03-30">
+                    </div>
+                    <button class="btn btn-danger" type="submit">Tornar indisponível</button>
+                </form>
+            {% else %}
+                <span class="badge badge-danger">Indisponível</span>
+
+                {% if court.temp_block %}
+                    <div class="meta-list" style="margin-top: 12px;">
+                        <span class="meta-item">Motivo: {{ court.temp_block.reason }}</span>
+                        <span class="meta-item">Até: {{ court.temp_block.until }}</span>
+                    </div>
+                {% endif %}
+
+                <form method="post" style="margin-top: 14px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="court_id" value="{{ court.id }}">
+                    <input type="hidden" name="action" value="enable">
+                    <button class="btn btn-success" type="submit">Tornar disponível</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <p class="helper-text">
+        Como os dados ainda são mockados, as alterações de disponibilidade resetam ao reiniciar o servidor.
+    </p>
+</div>
+{% endblock %}

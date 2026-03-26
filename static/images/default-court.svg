@@ -1,0 +1,5 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="700" fill="#CBD5E1"/>
+  <rect x="120" y="100" width="960" height="500" rx="24" fill="#E2E8F0"/>
+  <text x="600" y="360" text-anchor="middle" font-size="56" font-family="Arial" fill="#334155">Quadra Esportiva</text>
+</svg>

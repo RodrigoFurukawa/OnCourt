@@ -1,0 +1,40 @@
+{% extends "booking/base.html" %}
+{% load static %}
+
+{% block title %}Reservar{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+    <div class="card detail-image">
+        <img src="{% static court.image %}" alt="{{ court.name }}">
+    </div>
+
+    <div class="card detail-panel">
+        <h2>Reservar {{ court.name }}</h2>
+        <p class="section-subtitle">Escolha um horário e confirme sua reserva no protótipo.</p>
+
+        <div class="info-stack">
+            <div class="info-row"><strong>Local:</strong> {{ court.location }}</div>
+            <div class="info-row"><strong>Preço:</strong> R$ {{ court.price_per_hour }}/hora</div>
+            <div class="info-row"><strong>Contato:</strong> {{ court.contact }}</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="slot">Escolha um horário</label>
+            <select name="slot" id="slot">
+                {% for slot in court.slots %}
+                    <option value="{{ slot }}">{{ slot }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-success" type="submit" style="margin-top: 12px;">Confirmar reserva</button>
+        </form>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <p class="helper-text">Nesta fase do MVP, o pagamento ainda é apenas simulado.</p>
+    </div>
+</div>
+{% endblock %}
