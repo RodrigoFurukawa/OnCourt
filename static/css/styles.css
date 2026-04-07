@@ -594,6 +594,60 @@ select:focus {
     margin-top: 16px;
 }
 
+.timetable-grid,
+.admin-timetable {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.time-slot-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 10px;
+    text-align: left;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.time-slot-btn span {
+    font-size: 12px;
+}
+
+.time-slot-btn.is-available {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.time-slot-btn.is-booked,
+.time-slot-btn.is-blocked {
+    cursor: not-allowed;
+    opacity: 0.82;
+}
+
+.time-slot-btn.is-booked {
+    border-color: #fca5a5;
+    background: #fef2f2;
+}
+
+.time-slot-btn.is-blocked {
+    border-color: #fdba74;
+    background: #fff7ed;
+}
+
+.time-slot-btn.is-selected {
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.admin-slot-btn {
+    width: 100%;
+}
+
 .review-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -672,7 +726,9 @@ select:focus {
     }
 
     .filter-card form,
-    .admin-actions {
+    .admin-actions,
+    .timetable-grid,
+    .admin-timetable {
         grid-template-columns: 1fr;
     }
 

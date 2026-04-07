@@ -20,7 +20,35 @@
             <div class="meta-list">
                 <span class="meta-item">Esporte: {{ court.sport|title }}</span>
                 <span class="meta-item">Local: {{ court.location }}</span>
-                <span class="meta-item">Horários: {{ court.slots|join:", " }}</span>
+                <span class="meta-item">Clube: {{ court.club_name }}</span>
+            </div>
+
+            <div class="admin-timetable">
+                {% for slot in court.timetable %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="court_id" value="{{ court.id }}">
+                        <input type="hidden" name="action" value="toggle_slot">
+                        <input type="hidden" name="slot" value="{{ slot.time }}">
+                        <input type="hidden" name="blocked" value="{% if slot.status == 'blocked' %}false{% else %}true{% endif %}">
+                        <button
+                            class="time-slot-btn admin-slot-btn {% if slot.status == 'available' %}is-available{% elif slot.status == 'booked' %}is-booked{% else %}is-blocked{% endif %}"
+                            type="submit"
+                            {% if slot.status == 'booked' %}disabled{% endif %}
+                        >
+                            <strong>{{ slot.time }}</strong>
+                            <span>
+                                {% if slot.status == "booked" %}
+                                    Alugado
+                                {% elif slot.status == "blocked" %}
+                                    Bloqueado (clique para liberar)
+                                {% else %}
+                                    Disponível (clique para bloquear)
+                                {% endif %}
+                            </span>
+                        </button>
+                    </form>
+                {% endfor %}
             </div>
 
             {% if court.available_for_rent %}

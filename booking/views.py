@@ -13,6 +13,9 @@ from .mock_data import (
     get_courts_by_club,
     get_courts_by_club_and_sport,
     get_featured_clubs,
+    get_timetable,
+    get_blocked_slots,
+    set_slot_block,
     set_court_availability,
 )
 
@@ -138,17 +141,20 @@ def reserve_court(request, court_id):
     if not court["available_for_rent"]:
         return redirect("club_detail", club_id=court["club_id"])
 
+    reservations = request.session.get("reservations", [])
+    timetable = get_timetable(court_id, reservations=reservations)
+    available_slots = {slot["time"] for slot in timetable if slot["status"] == "available"}
+
     if request.method == "POST":
         slot = request.POST.get("slot")
 
-        if not slot or slot not in court["slots"]:
+        if not slot or slot not in available_slots:
             return render(request, "booking/reserve_court.html", {
                 "club": club,
                 "court": court,
+                "timetable": timetable,
                 "error": "Selecione um horário válido."
             })
-
-        reservations = request.session.get("reservations", [])
 
         reservations.append({
             "club_id": club["id"],
@@ -167,6 +173,7 @@ def reserve_court(request, court_id):
     return render(request, "booking/reserve_court.html", {
         "club": club,
         "court": court,
+        "timetable": timetable,
     })
 
 
@@ -187,10 +194,13 @@ def admin_dashboard(request):
     if request.method == "POST":
         court_id = int(request.POST.get("court_id"))
         action = request.POST.get("action")
-        reason = request.POST.get("reason", "")
-        until = request.POST.get("until", "")
-
-        if action == "disable":
+        if action == "toggle_slot":
+            slot = request.POST.get("slot")
+            blocked = request.POST.get("blocked") == "true"
+            set_slot_block(court_id, slot, blocked=blocked)
+        elif action == "disable":
+            reason = request.POST.get("reason", "")
+            until = request.POST.get("until", "")
             set_court_availability(court_id, False, reason=reason, until=until)
         elif action == "enable":
             set_court_availability(court_id, True)
@@ -206,6 +216,8 @@ def admin_dashboard(request):
             court_copy["club_name"] = club["name"]
             court_copy["location"] = club["location"]
             court_copy["temp_block"] = TEMP_BLOCKS.get(court["id"])
+            court_copy["blocked_slots"] = sorted(get_blocked_slots(court["id"]))
+            court_copy["timetable"] = get_timetable(court["id"])
             enriched_courts.append(court_copy)
 
     available_courts = [court for court in enriched_courts if court["available_for_rent"]]

@@ -1,5 +1,5 @@
 """
-ASGI config for quadra_mvp project.
+ASGI config for courton project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'quadra_mvp.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'courton.settings')
 
 application = get_asgi_application()
