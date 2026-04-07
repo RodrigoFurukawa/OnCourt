@@ -714,6 +714,116 @@ select:focus {
     color: var(--muted);
 }
 
+.schedule-card {
+    overflow-x: auto;
+}
+
+.schedule-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.legend-chip {
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.legend-chip.is-available {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.legend-chip.is-booked {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.legend-chip.is-blocked {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.legend-chip.is-unavailable {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.schedule-wrap {
+    overflow-x: auto;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #94a3b8;
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 820px;
+}
+
+.schedule-table th,
+.schedule-table td {
+    border: 1px solid #94a3b8;
+    padding: 10px;
+    text-align: center;
+}
+
+.schedule-table th {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.schedule-table th:first-child {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.time-col {
+    font-weight: 700;
+    background: #f8fafc;
+}
+
+.table-slot {
+    width: 100%;
+    border-radius: 10px;
+    padding: 9px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+button.table-slot {
+    cursor: pointer;
+}
+
+.table-slot.is-available {
+    background: #16a34a;
+    color: white;
+}
+
+.table-slot.is-booked {
+    background: #dc2626;
+    color: white;
+}
+
+.table-slot.is-blocked {
+    background: #ea580c;
+    color: white;
+}
+
+.table-slot.is-unavailable {
+    background: #cbd5e1;
+    color: #475569;
+}
+
 @media (max-width: 960px) {
     .hero,
     .detail-grid,

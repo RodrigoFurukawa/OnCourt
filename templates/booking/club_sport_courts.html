@@ -6,51 +6,63 @@
 {% block content %}
 <div class="card glass-card">
     <h2 class="section-title">{{ club.name }}</h2>
-    <p class="section-subtitle">Modalidade selecionada: <strong>{{ sport|title }}</strong></p>
+    <p class="section-subtitle">Modalidade selecionada: <strong>{{ sport|title }}</strong>. Escolha quadra e horário na mesma tela.</p>
 </div>
 
 {% if courts %}
-<div class="court-grid">
-    {% for court in courts %}
-    <article class="card court-card">
-        <div class="court-image">
-            <img src="{% static court.image %}" alt="{{ court.name }}">
-        </div>
+<div class="card schedule-card">
+    <h3 class="section-title" style="font-size: 24px;">Agenda de quadras</h3>
+    <div class="schedule-legend">
+        <span class="legend-chip is-available">🟢 Disponível</span>
+        <span class="legend-chip is-booked">🔴 Indisponível (já alugado)</span>
+        <span class="legend-chip is-blocked">🟠 Bloqueado pelo admin</span>
+        <span class="legend-chip is-unavailable">⚫ Horário não oferecido</span>
+    </div>
 
-        <div class="court-content">
-            <div class="court-top">
-                <div>
-                    <h3>{{ court.name }}</h3>
-                    <span class="badge badge-neutral">{{ court.sport|title }}</span>
-                </div>
-                {% if court.available_for_rent %}
-                    <span class="badge badge-success">Disponível</span>
-                {% else %}
-                    <span class="badge badge-danger">Indisponível</span>
-                {% endif %}
-            </div>
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
 
-            <div class="meta-list">
-                <span class="meta-item">⭐ {{ court.rating }}</span>
-                <span class="meta-item">💸 R$ {{ court.price_per_hour }}/h</span>
-            </div>
-
-            <p class="court-description">{{ court.description }}</p>
-
-            <div class="card-actions">
-                {% if court.available_for_rent %}
-                    {% if user.is_authenticated %}
-                        <a class="btn btn-success" href="{% url 'reserve_court' court.id %}">Reservar agora</a>
-                    {% else %}
-                        <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'reserve_court' court.id %}">Entrar para reservar</a>
-                    {% endif %}
-                {% else %}
-                    <span class="badge badge-danger">Quadra temporariamente indisponível</span>
-                {% endif %}
-            </div>
-        </div>
-    </article>
-    {% endfor %}
+    <div class="schedule-wrap">
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Horário</th>
+                    {% for court in courts %}
+                        <th>
+                            <div>{{ court.name }}</div>
+                            <small>R$ {{ court.price_per_hour }}/h</small>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in timetable_rows %}
+                    <tr>
+                        <td class="time-col">{{ row.time }}</td>
+                        {% for cell in row.cells %}
+                            <td>
+                                {% if cell.status == "available" %}
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="court_id" value="{{ cell.court_id }}">
+                                        <input type="hidden" name="slot" value="{{ cell.time }}">
+                                        <button type="submit" class="table-slot is-available">Reservar</button>
+                                    </form>
+                                {% elif cell.status == "booked" %}
+                                    <span class="table-slot is-booked">Indisponível</span>
+                                {% elif cell.status == "blocked" %}
+                                    <span class="table-slot is-blocked">Bloqueado</span>
+                                {% else %}
+                                    <span class="table-slot is-unavailable">-</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% else %}
 <div class="card empty-state">
