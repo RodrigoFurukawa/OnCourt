@@ -1,13 +1,13 @@
 {% extends "booking/base.html" %}
 {% load static %}
 
-{% block title %}Quadras{% endblock %}
+{% block title %}Clubes{% endblock %}
 
 {% block content %}
 <div class="card filter-card glass-card">
-    <h2 class="section-title">Encontre sua próxima quadra</h2>
+    <h2 class="section-title">Encontre seu próximo clube</h2>
     <p class="section-subtitle">
-        Filtre por modalidade, nome, disponibilidade, faixa de avaliação e ordenação.
+        Filtre por modalidade, nome, faixa de avaliação e ordenação.
     </p>
 
     <form method="get" class="custom-filter-form">
@@ -22,11 +22,6 @@
         </div>
 
         <div>
-            <label for="{{ form.availability.id_for_label }}">{{ form.availability.label }}</label>
-            {{ form.availability }}
-        </div>
-
-        <div>
             <label for="{{ form.sort_by.id_for_label }}">{{ form.sort_by.label }}</label>
             {{ form.sort_by }}
         </div>
@@ -34,9 +29,7 @@
         <div>
             <label for="{{ form.min_rating.id_for_label }}">
                 {{ form.min_rating.label }}:
-                <span id="min-rating-value">
-                    {% if form.min_rating.value %}{{ form.min_rating.value }}{% else %}0{% endif %}
-                </span>
+                <span id="min-rating-value">{% if form.min_rating.value %}{{ form.min_rating.value }}{% else %}0{% endif %}</span>
             </label>
             {{ form.min_rating }}
         </div>
@@ -44,9 +37,7 @@
         <div>
             <label for="{{ form.max_rating.id_for_label }}">
                 {{ form.max_rating.label }}:
-                <span id="max-rating-value">
-                    {% if form.max_rating.value %}{{ form.max_rating.value }}{% else %}5{% endif %}
-                </span>
+                <span id="max-rating-value">{% if form.max_rating.value %}{{ form.max_rating.value }}{% else %}5{% endif %}</span>
             </label>
             {{ form.max_rating }}
         </div>
@@ -57,48 +48,41 @@
     </form>
 </div>
 
-{% if courts %}
+{% if clubs %}
     <div class="court-grid">
-        {% for court in courts %}
+        {% for club in clubs %}
             <article class="card court-card">
                 <div class="court-image">
-                    <img src="{% static court.image %}" alt="{{ court.name }}">
-                    {% if court.featured %}
-                        <span class="image-pill">Top choice</span>
+                    <img src="{% static club.image %}" alt="{{ club.name }}">
+                    {% if club.featured %}
+                        <span class="image-pill">Top club</span>
                     {% endif %}
                 </div>
 
                 <div class="court-content">
                     <div class="court-top">
                         <div>
-                            <h3>{{ court.name }}</h3>
-                            <span class="badge badge-neutral">{{ court.sport|title }}</span>
+                            <h3>{{ club.name }}</h3>
+                            <span class="badge badge-neutral">Clube</span>
                         </div>
-
-                        {% if court.available_for_rent %}
-                            <span class="badge badge-success">Disponível</span>
-                        {% else %}
-                            <span class="badge badge-danger">Indisponível</span>
-                        {% endif %}
                     </div>
 
                     <div class="meta-list">
-                        <span class="meta-item">📍 {{ court.location }}</span>
-                        <span class="meta-item">⭐ {{ court.rating }}</span>
-                        <span class="meta-item">📏 {{ court.distance_km }} km</span>
-                        <span class="meta-item">💸 R$ {{ court.price_per_hour }}/h</span>
+                        <span class="meta-item">📍 {{ club.location }}</span>
+                        <span class="meta-item">⭐ {{ club.rating }}</span>
+                        <span class="meta-item">🏅 {{ club.sports|length }} modalidades</span>
                     </div>
 
                     <div class="tag-list">
-                        {% for tag in court.tags %}
-                            <span class="tag-chip">{{ tag }}</span>
+                        {% for sport in club.sports %}
+                            <span class="tag-chip">{{ sport|title }}</span>
                         {% endfor %}
                     </div>
 
-                    <p class="court-description">{{ court.description }}</p>
+                    <p class="court-description">{{ club.description }}</p>
 
                     <div class="card-actions">
-                        <a class="btn btn-primary" href="{% url 'court_detail' court.id %}">Ver detalhes</a>
+                        <a class="btn btn-primary" href="{% url 'club_detail' club.id %}">Entrar no clube</a>
                     </div>
                 </div>
             </article>
@@ -106,7 +90,7 @@
     </div>
 {% else %}
     <div class="card empty-state">
-        <h3>Nenhuma quadra encontrada</h3>
+        <h3>Nenhum clube encontrado</h3>
         <p>Tente alterar os filtros para visualizar outras opções.</p>
     </div>
 {% endif %}
@@ -119,16 +103,12 @@
 
     if (minSlider && minValue) {
         minValue.textContent = minSlider.value;
-        minSlider.addEventListener("input", function() {
-            minValue.textContent = this.value;
-        });
+        minSlider.addEventListener("input", function() { minValue.textContent = this.value; });
     }
 
     if (maxSlider && maxValue) {
         maxValue.textContent = maxSlider.value;
-        maxSlider.addEventListener("input", function() {
-            maxValue.textContent = this.value;
-        });
+        maxSlider.addEventListener("input", function() { maxValue.textContent = this.value; });
     }
 </script>
 {% endblock %}

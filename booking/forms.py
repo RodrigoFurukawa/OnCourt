@@ -13,26 +13,14 @@ SPORT_CHOICES = [
 
 SORT_CHOICES = [
     ("", "Sem ordenação"),
-    ("distance", "Distância"),
     ("rating", "Avaliação"),
     ("name", "Alfabética (A-Z)"),
 ]
 
-AVAILABILITY_CHOICES = [
-    ("", "Todas"),
-    ("available", "Somente disponíveis"),
-    ("unavailable", "Somente indisponíveis"),
-]
 
-
-class CourtFilterForm(forms.Form):
+class ClubFilterForm(forms.Form):
     sport = forms.ChoiceField(choices=SPORT_CHOICES, required=False, label="Esporte")
-    name = forms.CharField(required=False, label="Nome da quadra")
-    availability = forms.ChoiceField(
-        choices=AVAILABILITY_CHOICES,
-        required=False,
-        label="Disponibilidade",
-    )
+    name = forms.CharField(required=False, label="Nome do clube")
     min_rating = forms.FloatField(
         required=False,
         label="Avaliação mínima",

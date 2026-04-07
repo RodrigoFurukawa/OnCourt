@@ -1,34 +1,40 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
-from django.urls import reverse
 
-from .forms import CourtFilterForm, SignUpForm
+from .forms import ClubFilterForm, SignUpForm
 from .mock_data import (
     TEMP_BLOCKS,
-    filter_courts,
-    get_all_courts,
-    get_available_courts,
+    filter_clubs,
+    get_all_clubs,
+    get_available_courts_by_club,
+    get_club_by_id,
     get_court_by_id,
-    get_featured_courts,
+    get_courts_by_club,
+    get_courts_by_club_and_sport,
+    get_featured_clubs,
     set_court_availability,
 )
 
 
 def home(request):
-    featured_courts = get_featured_courts()
+    featured_clubs = get_featured_clubs()
+    all_clubs = get_all_clubs()
+
+    total_courts = sum(len(get_courts_by_club(club["id"])) for club in all_clubs)
+    total_available = sum(len(get_available_courts_by_club(club["id"])) for club in all_clubs)
 
     stats = {
-        "courts": len(get_all_courts()),
-        "available": len(get_available_courts()),
-        "sports": len(set(court["sport"] for court in get_all_courts())),
-        "avg_rating": round(
-            sum(court["rating"] for court in get_all_courts()) / len(get_all_courts()), 1
-        ) if get_all_courts() else 0,
+        "clubs": len(all_clubs),
+        "courts": total_courts,
+        "available": total_available,
+        "sports": len(set(sport for club in all_clubs for sport in club.get("sports", []))),
+        "avg_rating": round(sum(club["rating"] for club in all_clubs) / len(all_clubs), 1)
+        if all_clubs else 0,
     }
 
     return render(request, "booking/home.html", {
-        "featured_courts": featured_courts,
+        "featured_clubs": featured_clubs,
         "stats": stats,
     })
 
@@ -45,15 +51,14 @@ def contact(request):
     return render(request, "booking/contact.html")
 
 
-def court_list(request):
-    form = CourtFilterForm(request.GET or None)
-    courts = get_all_courts()
+def club_list(request):
+    form = ClubFilterForm(request.GET or None)
+    clubs = get_all_clubs()
 
     if form.is_valid():
         sport = form.cleaned_data.get("sport")
         name = form.cleaned_data.get("name")
         sort_by = form.cleaned_data.get("sort_by")
-        availability = form.cleaned_data.get("availability")
         min_rating = form.cleaned_data.get("min_rating")
         max_rating = form.cleaned_data.get("max_rating")
 
@@ -63,28 +68,46 @@ def court_list(request):
         if max_rating is None:
             max_rating = 5
 
-        courts = filter_courts(
+        clubs = filter_clubs(
             sport=sport,
             name=name,
             sort_by=sort_by,
-            availability=availability,
             min_rating=min_rating,
             max_rating=max_rating,
         )
 
-    return render(request, "booking/court_list.html", {
+    return render(request, "booking/club_list.html", {
         "form": form,
-        "courts": courts,
+        "clubs": clubs,
     })
 
 
-def court_detail(request, court_id):
-    court = get_court_by_id(court_id)
-    if not court:
-        return redirect("court_list")
+def club_detail(request, club_id):
+    club = get_club_by_id(club_id)
+    if not club:
+        return redirect("club_list")
 
-    return render(request, "booking/court_detail.html", {
-        "court": court
+    courts = get_courts_by_club(club_id)
+    available_courts = [court for court in courts if court["available_for_rent"]]
+
+    return render(request, "booking/club_detail.html", {
+        "club": club,
+        "courts": courts,
+        "available_courts": available_courts,
+    })
+
+
+def club_sport_courts(request, club_id, sport):
+    club = get_club_by_id(club_id)
+    if not club:
+        return redirect("club_list")
+
+    courts = get_courts_by_club_and_sport(club_id, sport)
+
+    return render(request, "booking/club_sport_courts.html", {
+        "club": club,
+        "sport": sport,
+        "courts": courts,
     })
 
 
@@ -108,16 +131,19 @@ def signup_view(request):
 def reserve_court(request, court_id):
     court = get_court_by_id(court_id)
     if not court:
-        return redirect("court_list")
+        return redirect("club_list")
+
+    club = get_club_by_id(court["club_id"])
 
     if not court["available_for_rent"]:
-        return redirect("court_detail", court_id=court_id)
+        return redirect("club_detail", club_id=court["club_id"])
 
     if request.method == "POST":
         slot = request.POST.get("slot")
 
         if not slot or slot not in court["slots"]:
             return render(request, "booking/reserve_court.html", {
+                "club": club,
                 "court": court,
                 "error": "Selecione um horário válido."
             })
@@ -125,9 +151,12 @@ def reserve_court(request, court_id):
         reservations = request.session.get("reservations", [])
 
         reservations.append({
+            "club_id": club["id"],
+            "club_name": club["name"],
             "court_id": court["id"],
             "court_name": court["name"],
-            "location": court["location"],
+            "sport": court["sport"],
+            "location": club["location"],
             "slot": slot,
             "price_per_hour": court["price_per_hour"],
         })
@@ -136,7 +165,8 @@ def reserve_court(request, court_id):
         return redirect("my_reservations")
 
     return render(request, "booking/reserve_court.html", {
-        "court": court
+        "club": club,
+        "court": court,
     })
 
 
@@ -167,14 +197,18 @@ def admin_dashboard(request):
 
         return redirect("admin_dashboard")
 
-    courts = get_all_courts()
-    available_courts = get_available_courts()
-
+    clubs = get_all_clubs()
     enriched_courts = []
-    for court in courts:
-        court_copy = court.copy()
-        court_copy["temp_block"] = TEMP_BLOCKS.get(court["id"])
-        enriched_courts.append(court_copy)
+
+    for club in clubs:
+        for court in get_courts_by_club(club["id"]):
+            court_copy = court.copy()
+            court_copy["club_name"] = club["name"]
+            court_copy["location"] = club["location"]
+            court_copy["temp_block"] = TEMP_BLOCKS.get(court["id"])
+            enriched_courts.append(court_copy)
+
+    available_courts = [court for court in enriched_courts if court["available_for_rent"]]
 
     return render(request, "booking/admin_dashboard.html", {
         "courts": enriched_courts,
