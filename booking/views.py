@@ -1,6 +1,7 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .forms import ClubFilterForm, SignUpForm
 from .mock_data import (
@@ -13,6 +14,9 @@ from .mock_data import (
     get_courts_by_club,
     get_courts_by_club_and_sport,
     get_featured_clubs,
+    get_timetable,
+    get_blocked_slots,
+    set_slot_block,
     set_court_availability,
 )
 
@@ -103,11 +107,76 @@ def club_sport_courts(request, club_id, sport):
         return redirect("club_list")
 
     courts = get_courts_by_club_and_sport(club_id, sport)
+    reservations = request.session.get("reservations", [])
+
+    court_timetables = {
+        court["id"]: {
+            slot_info["time"]: slot_info["status"]
+            for slot_info in get_timetable(court["id"], reservations=reservations)
+        }
+        for court in courts
+    }
+
+    all_raw_slots = sorted({slot for court in courts for slot in court["slots"]})
+    all_slots = []
+    if all_raw_slots:
+        slot_hours = sorted(int(slot.split(":")[0]) for slot in all_raw_slots)
+        for hour in range(slot_hours[0], slot_hours[-1] + 1):
+            all_slots.append(f"{hour:02d}:00")
+
+    timetable_rows = []
+
+    for time in all_slots:
+        row = {"time": time, "cells": []}
+        for court in courts:
+            status = court_timetables[court["id"]].get(time, "unavailable")
+            row["cells"].append({
+                "court_id": court["id"],
+                "time": time,
+                "status": status,
+            })
+        timetable_rows.append(row)
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            next_url = reverse("club_sport_courts", args=[club_id, sport])
+            return redirect(f"{reverse('login')}?next={next_url}")
+
+        court_id = int(request.POST.get("court_id"))
+        slot = request.POST.get("slot")
+        court = get_court_by_id(court_id)
+
+        slot_available = any(
+            slot_info["time"] == slot and slot_info["status"] == "available"
+            for slot_info in get_timetable(court_id, reservations=reservations)
+        )
+        if not court or court["club_id"] != club_id or court["sport"] != sport or not slot_available:
+            return render(request, "booking/club_sport_courts.html", {
+                "club": club,
+                "sport": sport,
+                "courts": courts,
+                "timetable_rows": timetable_rows,
+                "error": "Horário indisponível para reserva. Escolha outro horário.",
+            })
+
+        reservations.append({
+            "club_id": club["id"],
+            "club_name": club["name"],
+            "court_id": court["id"],
+            "court_name": court["name"],
+            "sport": court["sport"],
+            "location": club["location"],
+            "slot": slot,
+            "price_per_hour": court["price_per_hour"],
+        })
+        request.session["reservations"] = reservations
+        return redirect("my_reservations")
 
     return render(request, "booking/club_sport_courts.html", {
         "club": club,
         "sport": sport,
         "courts": courts,
+        "timetable_rows": timetable_rows,
     })
 
 
@@ -138,17 +207,20 @@ def reserve_court(request, court_id):
     if not court["available_for_rent"]:
         return redirect("club_detail", club_id=court["club_id"])
 
+    reservations = request.session.get("reservations", [])
+    timetable = get_timetable(court_id, reservations=reservations)
+    available_slots = {slot["time"] for slot in timetable if slot["status"] == "available"}
+
     if request.method == "POST":
         slot = request.POST.get("slot")
 
-        if not slot or slot not in court["slots"]:
+        if not slot or slot not in available_slots:
             return render(request, "booking/reserve_court.html", {
                 "club": club,
                 "court": court,
+                "timetable": timetable,
                 "error": "Selecione um horário válido."
             })
-
-        reservations = request.session.get("reservations", [])
 
         reservations.append({
             "club_id": club["id"],
@@ -167,6 +239,7 @@ def reserve_court(request, court_id):
     return render(request, "booking/reserve_court.html", {
         "club": club,
         "court": court,
+        "timetable": timetable,
     })
 
 
@@ -187,10 +260,13 @@ def admin_dashboard(request):
     if request.method == "POST":
         court_id = int(request.POST.get("court_id"))
         action = request.POST.get("action")
-        reason = request.POST.get("reason", "")
-        until = request.POST.get("until", "")
-
-        if action == "disable":
+        if action == "toggle_slot":
+            slot = request.POST.get("slot")
+            blocked = request.POST.get("blocked") == "true"
+            set_slot_block(court_id, slot, blocked=blocked)
+        elif action == "disable":
+            reason = request.POST.get("reason", "")
+            until = request.POST.get("until", "")
             set_court_availability(court_id, False, reason=reason, until=until)
         elif action == "enable":
             set_court_availability(court_id, True)
@@ -206,6 +282,8 @@ def admin_dashboard(request):
             court_copy["club_name"] = club["name"]
             court_copy["location"] = club["location"]
             court_copy["temp_block"] = TEMP_BLOCKS.get(court["id"])
+            court_copy["blocked_slots"] = sorted(get_blocked_slots(court["id"]))
+            court_copy["timetable"] = get_timetable(court["id"])
             enriched_courts.append(court_copy)
 
     available_courts = [court for court in enriched_courts if court["available_for_rent"]]

@@ -22,12 +22,29 @@
 
         <form method="post">
             {% csrf_token %}
-            <label for="slot">Escolha um horário</label>
-            <select name="slot" id="slot">
-                {% for slot in court.slots %}
-                    <option value="{{ slot }}">{{ slot }}</option>
+            <label>Escolha um horário no timetable</label>
+            <input type="hidden" name="slot" id="selected-slot">
+            <div class="timetable-grid">
+                {% for slot in timetable %}
+                    <button
+                        type="button"
+                        class="time-slot-btn {% if slot.status == 'booked' %}is-booked{% elif slot.status == 'blocked' %}is-blocked{% else %}is-available{% endif %}"
+                        data-slot="{{ slot.time }}"
+                        {% if slot.status != "available" %}disabled{% endif %}
+                    >
+                        <strong>{{ slot.time }}</strong>
+                        <span>
+                            {% if slot.status == "booked" %}
+                                Já alugado
+                            {% elif slot.status == "blocked" %}
+                                Bloqueado admin
+                            {% else %}
+                                Disponível
+                            {% endif %}
+                        </span>
+                    </button>
                 {% endfor %}
-            </select>
+            </div>
             <button class="btn btn-success" type="submit" style="margin-top: 12px;">Confirmar reserva</button>
         </form>
 
@@ -38,4 +55,16 @@
         <p class="helper-text">Nesta fase do MVP, o pagamento ainda é apenas simulado.</p>
     </div>
 </div>
+<script>
+    const slotInput = document.getElementById("selected-slot");
+    const slotButtons = document.querySelectorAll(".time-slot-btn.is-available");
+
+    slotButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            slotButtons.forEach((btn) => btn.classList.remove("is-selected"));
+            button.classList.add("is-selected");
+            slotInput.value = button.dataset.slot;
+        });
+    });
+</script>
 {% endblock %}

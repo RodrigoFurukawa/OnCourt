@@ -594,6 +594,60 @@ select:focus {
     margin-top: 16px;
 }
 
+.timetable-grid,
+.admin-timetable {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.time-slot-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 10px;
+    text-align: left;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.time-slot-btn span {
+    font-size: 12px;
+}
+
+.time-slot-btn.is-available {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.time-slot-btn.is-booked,
+.time-slot-btn.is-blocked {
+    cursor: not-allowed;
+    opacity: 0.82;
+}
+
+.time-slot-btn.is-booked {
+    border-color: #fca5a5;
+    background: #fef2f2;
+}
+
+.time-slot-btn.is-blocked {
+    border-color: #fdba74;
+    background: #fff7ed;
+}
+
+.time-slot-btn.is-selected {
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.admin-slot-btn {
+    width: 100%;
+}
+
 .review-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -660,6 +714,157 @@ select:focus {
     color: var(--muted);
 }
 
+.schedule-card {
+    overflow: hidden;
+    padding: 28px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.schedule-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.legend-chip {
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.legend-chip.is-available {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+}
+
+.legend-chip.is-booked {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.legend-chip.is-blocked {
+    background: #ffedd5;
+    color: #9a3412;
+    border-color: #fdba74;
+}
+
+.legend-chip.is-unavailable {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.schedule-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 100%;
+    background: white;
+    table-layout: fixed;
+}
+
+.schedule-table th,
+.schedule-table td {
+    border: 1px solid #dbe2ea;
+    padding: 10px 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.schedule-table th {
+    background: #eef2ff;
+    color: #1e293b;
+    height: 76px;
+}
+
+.schedule-table th:first-child {
+    background: #f8fafc;
+    color: #334155;
+    width: 110px;
+}
+
+.time-col {
+    font-weight: 700;
+    background: #f8fafc;
+    width: 110px;
+}
+
+.court-header {
+    padding: 10px 8px;
+}
+
+.court-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.table-slot {
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    min-height: 40px;
+    transition: 0.2s ease;
+    text-decoration: none;
+}
+
+.schedule-table form {
+    margin: 0;
+}
+
+button.table-slot {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+}
+
+button.table-slot:hover {
+    transform: translateY(-1px);
+}
+
+.table-slot.is-available {
+    background: #16a34a;
+    color: white;
+}
+
+.table-slot.is-booked {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.table-slot.is-blocked {
+    background: #ea580c;
+    color: white;
+}
+
+.table-slot.is-unavailable {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
 @media (max-width: 960px) {
     .hero,
     .detail-grid,
@@ -672,8 +877,28 @@ select:focus {
     }
 
     .filter-card form,
-    .admin-actions {
+    .admin-actions,
+    .timetable-grid,
+    .admin-timetable {
         grid-template-columns: 1fr;
+    }
+
+    .schedule-card {
+        padding: 16px;
+    }
+
+    .schedule-table {
+        font-size: 14px;
+    }
+
+    .court-name {
+        font-size: 15px;
+    }
+
+    .table-slot {
+        min-height: 36px;
+        font-size: 11px;
+        padding: 8px 6px;
     }
 
     .hero h1,

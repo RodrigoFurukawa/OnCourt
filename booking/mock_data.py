@@ -63,6 +63,21 @@ COURTS = [
         "tags": ["Piso rápido", "Premium", "Bem avaliada"],
     },
     {
+        "id": 103,
+        "club_id": 1,
+        "name": "Quadra Futsal B",
+        "sport": "futsal",
+        "distance_km": 2.5,
+        "rating": 4.6,
+        "price_per_hour": 170,
+        "available_for_rent": True,
+        "description": "Quadra de futsal com piso em ótimo estado, ideal para jogos recreativos e treinos.",
+        "contact": "(11) 99999-1212",
+        "slots": ["07:00", "08:00", "09:00", "17:00", "18:00", "19:00"],
+        "image": "images/futsal.svg",
+        "tags": ["Boa iluminação", "Custo-benefício", "Fácil acesso"],
+    },
+    {
         "id": 201,
         "club_id": 2,
         "name": "Quadra Vôlei Indoor",
@@ -115,20 +130,31 @@ TEMP_BLOCKS = {
         "until": "2026-04-20",
     }
 }
+SLOT_BLOCKS = {}
+
+
+def _get_sports_for_club(club_id):
+    return sorted({court["sport"] for court in COURTS if court["club_id"] == club_id})
+
+
+def _enrich_club(club):
+    club_copy = club.copy()
+    club_copy["sports"] = _get_sports_for_club(club["id"])
+    return club_copy
 
 
 def get_all_clubs():
-    return CLUBS
+    return [_enrich_club(club) for club in CLUBS]
 
 
 def get_featured_clubs():
-    return [club for club in CLUBS if club.get("featured")]
+    return [_enrich_club(club) for club in CLUBS if club.get("featured")]
 
 
 def get_club_by_id(club_id):
     for club in CLUBS:
         if club["id"] == club_id:
-            return club
+            return _enrich_club(club)
     return None
 
 
@@ -177,6 +203,54 @@ def get_court_by_id(court_id):
         if court["id"] == court_id:
             return court
     return None
+
+
+def get_reserved_slots(court_id, reservations):
+    return {
+        reservation["slot"]
+        for reservation in reservations
+        if reservation.get("court_id") == court_id
+    }
+
+
+def get_blocked_slots(court_id):
+    return set(SLOT_BLOCKS.get(court_id, set()))
+
+
+def get_timetable(court_id, reservations=None):
+    court = get_court_by_id(court_id)
+    if not court:
+        return []
+
+    reserved_slots = get_reserved_slots(court_id, reservations or [])
+    blocked_slots = get_blocked_slots(court_id)
+
+    timetable = []
+    for slot in court["slots"]:
+        if slot in reserved_slots:
+            status = "booked"
+        elif slot in blocked_slots:
+            status = "blocked"
+        else:
+            status = "available"
+        timetable.append({"time": slot, "status": status})
+
+    return timetable
+
+
+def set_slot_block(court_id, slot, blocked=True):
+    court = get_court_by_id(court_id)
+    if not court or slot not in court["slots"]:
+        return False
+
+    if blocked:
+        SLOT_BLOCKS.setdefault(court_id, set()).add(slot)
+    else:
+        court_blocks = SLOT_BLOCKS.get(court_id, set())
+        court_blocks.discard(slot)
+        if not court_blocks and court_id in SLOT_BLOCKS:
+            SLOT_BLOCKS.pop(court_id)
+    return True
 
 
 def set_court_availability(court_id, is_available, reason="", until=""):
