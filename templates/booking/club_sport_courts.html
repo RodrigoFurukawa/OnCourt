@@ -13,10 +13,10 @@
 <div class="card schedule-card">
     <h3 class="section-title" style="font-size: 24px;">Agenda de quadras</h3>
     <div class="schedule-legend">
-        <span class="legend-chip is-available">🟢 Disponível</span>
-        <span class="legend-chip is-booked">🔴 Indisponível (já alugado)</span>
-        <span class="legend-chip is-blocked">🟠 Bloqueado pelo admin</span>
-        <span class="legend-chip is-unavailable">⚫ Horário não oferecido</span>
+        <span class="legend-chip is-available">Disponível</span>
+        <span class="legend-chip is-booked">Indisponível (já alugado)</span>
+        <span class="legend-chip is-blocked">Bloqueado pelo admin</span>
+        <span class="legend-chip is-unavailable">Não ofertado na quadra</span>
     </div>
 
     {% if error %}
@@ -29,9 +29,9 @@
                 <tr>
                     <th>Horário</th>
                     {% for court in courts %}
-                        <th>
-                            <div>{{ court.name }}</div>
-                            <small>R$ {{ court.price_per_hour }}/h</small>
+                        <th class="court-header">
+                            <div class="court-name">{{ court.name }}</div>
+                            <small>R$ {{ court.price_per_hour }}/h • ⭐ {{ court.rating }}</small>
                         </th>
                     {% endfor %}
                 </tr>
@@ -47,7 +47,7 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="court_id" value="{{ cell.court_id }}">
                                         <input type="hidden" name="slot" value="{{ cell.time }}">
-                                        <button type="submit" class="table-slot is-available">Reservar</button>
+                                        <button type="submit" class="table-slot is-available">Selecionar horário</button>
                                     </form>
                                 {% elif cell.status == "booked" %}
                                     <span class="table-slot is-booked">Indisponível</span>

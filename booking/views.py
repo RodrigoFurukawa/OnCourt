@@ -109,17 +109,27 @@ def club_sport_courts(request, club_id, sport):
     courts = get_courts_by_club_and_sport(club_id, sport)
     reservations = request.session.get("reservations", [])
 
-    all_slots = sorted({slot for court in courts for slot in court["slots"]})
+    court_timetables = {
+        court["id"]: {
+            slot_info["time"]: slot_info["status"]
+            for slot_info in get_timetable(court["id"], reservations=reservations)
+        }
+        for court in courts
+    }
+
+    all_raw_slots = sorted({slot for court in courts for slot in court["slots"]})
+    all_slots = []
+    if all_raw_slots:
+        slot_hours = sorted(int(slot.split(":")[0]) for slot in all_raw_slots)
+        for hour in range(slot_hours[0], slot_hours[-1] + 1):
+            all_slots.append(f"{hour:02d}:00")
+
     timetable_rows = []
 
     for time in all_slots:
         row = {"time": time, "cells": []}
         for court in courts:
-            court_timetable = {
-                slot_info["time"]: slot_info["status"]
-                for slot_info in get_timetable(court["id"], reservations=reservations)
-            }
-            status = court_timetable.get(time, "unavailable")
+            status = court_timetables[court["id"]].get(time, "unavailable")
             row["cells"].append({
                 "court_id": court["id"],
                 "time": time,
