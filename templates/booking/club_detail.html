@@ -1,0 +1,31 @@
+{% extends "booking/base.html" %}
+{% load static %}
+
+{% block title %}{{ club.name }}{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+    <div class="card detail-image">
+        <img src="{% static club.image %}" alt="{{ club.name }}">
+    </div>
+
+    <div class="card detail-panel glass-card">
+        <h2>{{ club.name }}</h2>
+        <p class="section-subtitle">{{ club.description }}</p>
+
+        <div class="info-stack">
+            <div class="info-row"><strong>Local:</strong> {{ club.location }}</div>
+            <div class="info-row"><strong>Avaliação:</strong> {{ club.rating }}</div>
+            <div class="info-row"><strong>Quadras totais:</strong> {{ courts|length }}</div>
+            <div class="info-row"><strong>Quadras disponíveis:</strong> {{ available_courts|length }}</div>
+        </div>
+
+        <h3>Escolha um esporte</h3>
+        <div class="tag-list">
+            {% for sport in club.sports %}
+                <a class="btn btn-primary" href="{% url 'club_sport_courts' club.id sport %}">{{ sport|title }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

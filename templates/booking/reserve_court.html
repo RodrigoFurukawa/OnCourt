@@ -11,10 +11,11 @@
 
     <div class="card detail-panel">
         <h2>Reservar {{ court.name }}</h2>
-        <p class="section-subtitle">Escolha um horário e confirme sua reserva no protótipo.</p>
+        <p class="section-subtitle">Clube: <strong>{{ club.name }}</strong></p>
 
         <div class="info-stack">
-            <div class="info-row"><strong>Local:</strong> {{ court.location }}</div>
+            <div class="info-row"><strong>Esporte:</strong> {{ court.sport|title }}</div>
+            <div class="info-row"><strong>Local:</strong> {{ club.location }}</div>
             <div class="info-row"><strong>Preço:</strong> R$ {{ court.price_per_hour }}/hora</div>
             <div class="info-row"><strong>Contato:</strong> {{ court.contact }}</div>
         </div>
