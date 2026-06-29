@@ -1,0 +1,23 @@
+# Blueprint do Render. Importe em: Render Dashboard > New > Blueprint (aponta p/ este repo).
+# O banco é o Supabase (Postgres) — defina DATABASE_URL como secret no dashboard.
+services:
+  - type: web
+    name: oncourt
+    runtime: python
+    plan: free
+    buildCommand: "bash ./build.sh"
+    startCommand: "gunicorn courton.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.4"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      # Connection string do Supabase. Definir no dashboard (Secret), não versionar.
+      - key: DATABASE_URL
+        sync: false

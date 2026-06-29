@@ -15,15 +15,23 @@
 
         <div class="info-stack">
             <div class="info-row"><strong>Esporte:</strong> {{ court.sport|title }}</div>
+            {% if court.size %}<div class="info-row"><strong>Tamanho:</strong> {{ court.size }}</div>{% endif %}
+            {% if court.surface %}<div class="info-row"><strong>Piso:</strong> {{ court.surface }}{% if court.is_indoor %} • Coberta{% endif %}</div>{% endif %}
             <div class="info-row"><strong>Local:</strong> {{ club.location }}</div>
             <div class="info-row"><strong>Preço:</strong> R$ {{ court.price_per_hour }}/hora</div>
             <div class="info-row"><strong>Contato:</strong> {{ court.contact }}</div>
         </div>
 
+        <form method="get" class="date-picker" style="margin:8px 0; display:flex; gap:8px; align-items:center;">
+            <label for="date"><strong>Data:</strong></label>
+            <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+        </form>
+
         <form method="post">
             {% csrf_token %}
             <label>Escolha um horário no timetable</label>
             <input type="hidden" name="slot" id="selected-slot">
+            <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
             <div class="timetable-grid">
                 {% for slot in timetable %}
                     <button

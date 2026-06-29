@@ -1,0 +1,15 @@
+# Core
+Django>=6.0,<6.1
+
+# Banco — Postgres em todos os ambientes (paridade dev/prod)
+psycopg[binary]>=3.2
+dj-database-url>=2.3
+
+# Config por ambiente
+python-dotenv>=1.0
+
+# Servir estáticos (Render/prod)
+whitenoise>=6.8
+
+# WSGI server (produção: Render/AWS — Linux). No Windows não roda nativamente.
+gunicorn>=23.0

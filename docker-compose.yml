@@ -1,0 +1,27 @@
+# Postgres local para desenvolvimento (paridade com Supabase/RDS).
+# Subir:   docker compose up -d
+# Parar:   docker compose down
+# Resetar: docker compose down -v   (apaga o volume/dados)
+#
+# Depois de subir, descomente DATABASE_URL no .env e rode:
+#   python manage.py migrate
+services:
+  db:
+    image: postgres:17
+    container_name: oncourt-db
+    environment:
+      POSTGRES_USER: oncourt
+      POSTGRES_PASSWORD: oncourt
+      POSTGRES_DB: oncourt
+    ports:
+      - "5432:5432"
+    volumes:
+      - oncourt_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oncourt -d oncourt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  oncourt_pgdata:

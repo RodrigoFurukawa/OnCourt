@@ -11,6 +11,10 @@
         <span class="meta-item">Total de quadras: {{ courts|length }}</span>
         <span class="meta-item">Disponíveis: {{ available_courts|length }}</span>
     </div>
+    <form method="get" class="date-picker" style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <label for="date"><strong>Agenda do dia:</strong></label>
+        <input type="date" id="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+    </form>
 </div>
 
 <div class="card">
@@ -30,7 +34,7 @@
                         <input type="hidden" name="court_id" value="{{ court.id }}">
                         <input type="hidden" name="action" value="toggle_slot">
                         <input type="hidden" name="slot" value="{{ slot.time }}">
-                        <input type="hidden" name="blocked" value="{% if slot.status == 'blocked' %}false{% else %}true{% endif %}">
+                        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
                         <button
                             class="time-slot-btn admin-slot-btn {% if slot.status == 'available' %}is-available{% elif slot.status == 'booked' %}is-booked{% else %}is-blocked{% endif %}"
                             type="submit"
@@ -57,6 +61,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="court_id" value="{{ court.id }}">
                     <input type="hidden" name="action" value="disable">
+                    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
                     <div>
                         <label>Motivo do bloqueio</label>
                         <input type="text" name="reason" placeholder="Ex.: manutenção">
@@ -81,6 +86,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="court_id" value="{{ court.id }}">
                     <input type="hidden" name="action" value="enable">
+                    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
                     <button class="btn btn-success" type="submit">Tornar disponível</button>
                 </form>
             {% endif %}
@@ -90,7 +96,7 @@
 
 <div class="card">
     <p class="helper-text">
-        Como os dados ainda são mockados, as alterações de disponibilidade resetam ao reiniciar o servidor.
+        Bloqueios de horário valem para a data selecionada. Tornar a quadra indisponível afeta todas as datas.
     </p>
 </div>
 {% endblock %}
